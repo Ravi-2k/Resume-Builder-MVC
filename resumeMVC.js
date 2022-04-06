@@ -1,7 +1,9 @@
 const sectionConfig = {
   headingSectionForm: {
+    sectionClassName: "headingEntry",
     name: "Heading Section",
     sectionDomLocationId: "headingSectionForm",
+    heads: ["Name", "Collage", "Email", "DOB", "Address"],
   },
   educationSectionForm: {
     sectionClassName: "educationEntry",
@@ -28,15 +30,15 @@ const sectionConfig = {
     heads: ["Name", "Type", "Description", "Guide", "Timeline", "TeamSize"],
     classAttributesForNewFields: [
       "internshipAndProjectEntry internshipEntry",
-      "internshipAndProjectTitle bold",
-      "internshipAndProjectTitleAdd",
-      "internshipAndProjectTitleRural",
-      "internshipAndProjectInfo",
-      "internshipAndProjectInfoDetail",
-      "internshipAndProjectInfoProff",
-      "internshipAndProjectPeriodAndTeam",
-      "internshipAndProjectPeriod",
-      "internshipAndProjectTeam",
+      "internshipAndProjectTitle bold fullWidth",
+      "fullWidth",
+      "fullWidth",
+      "internshipAndProjectInfo fullWidth",
+      "fullWidth",
+      "fullWidth",
+      "internshipAndProjectPeriodAndTeam fullWidth",
+      "fullWidth",
+      "fullWidth",
     ],
     name: "Internships",
   },
@@ -46,15 +48,15 @@ const sectionConfig = {
     heads: ["Name", "Guide", "Description", "Link", "Timeline", "TeamSize"],
     classAttributesForNewFields: [
       "internshipAndProjectEntry projectEntry",
-      "internshipAndProjectTitle",
-      "internshipAndProjectTitleAdd bold",
-      "internshipAndProjectTitleRural",
-      "internshipAndProjectInfo",
-      "internshipAndProjectInfoDetail",
-      "internshipAndProjectInfoProff",
-      "internshipAndProjectPeriodAndTeam",
-      "internshipAndProjectPeriod",
-      "internshipAndProjectTeam",
+      "internshipAndProjectTitle fullWidth",
+      "fullWidth bold",
+      "fullWidth",
+      "internshipAndProjectInfo fullWidth",
+      "fullWidth",
+      "fullWidth",
+      "internshipAndProjectPeriodAndTeam fullWidth",
+      "fullWidth",
+      "fullWidth",
     ],
     name: "Projects",
   },
@@ -62,13 +64,11 @@ const sectionConfig = {
     sectionClassName: "responsibilityEntry",
     sectionDomLocationId: "responsibilitySectionForm",
     name: "Responsibilities",
-    heads: [""],
   },
   hobbySectionForm: {
     sectionClassName: "hobbyEntry",
     sectionDomLocationId: "hobbySectionForm",
     name: "Interests and Hobbies",
-    heads: [""],
   },
   awardSectionForm: {
     sectionClassName: "awardEntry",
@@ -78,30 +78,12 @@ const sectionConfig = {
       "childDetail awardEntry",
     ],
     name: "Awards and Achievements",
-    heads: [""],
   },
 };
 
 //FormView Helper Functions
-function getHeadingSectionRow(labelName, inputFieldId, inputFieldContent) {
-  let resumeFormRow, resumeFormRowLabel, resumeFormRowInput;
-  resumeFormRow = createElement("div", "resumeFormRow");
-  resumeFormRowLabel = createElement("label", "resumeFormLabels", labelName);
-  resumeFormRowInput = createElement("input", "resumeFormInputField");
-  resumeFormRowInput.placeholder = "Enter Here";
-  resumeFormRowInput.id = inputFieldId;
-  resumeFormRowInput.required = true;
-  resumeFormRowInput.value = inputFieldContent;
-  resumeFormRow.append(resumeFormRowLabel, resumeFormRowInput);
-
-  return resumeFormRow;
-}
-
 function emptySectionsInResumeView() {
   for (let section in sectionConfig) {
-    if (section === "headingSectionForm") continue;
-
-    // console.log(section);
     document
       .querySelectorAll(`.${sectionConfig[section].sectionClassName}`)
       .forEach((e) => e.remove());
@@ -121,18 +103,22 @@ function getElement(selector, all) {
   return document.querySelector(selector);
 }
 
-function getFormSectionHeading(divId, name, formViewRef) {
+function createSectionRef(divId, formViewRef) {
   let temp = divId;
-  formViewRef[divId] = createElement("div", "resumeFormRowForSections");
+  formViewRef[divId] = createElement(
+    "div",
+    "resumeFormRowForSections fullWidth"
+  );
   formViewRef[divId].id = temp;
-  let heading = createElement("h2", "sectionHeading", name);
 
-  formViewRef[divId].append(heading);
   return formViewRef[divId];
 }
 
 function getApplyAndResetButtonsDiv(formViewRef) {
-  formViewRef.applyAndResetBtnsDiv = createElement("div", "applyAndResetBtns");
+  formViewRef.applyAndResetBtnsDiv = createElement(
+    "div",
+    "applyAndResetBtns fullWidth"
+  );
   formViewRef.resetBtn = createElement("button", "resetBtn");
   formViewRef.resetBtn.innerHTML = "Reset";
   formViewRef.resetBtn.type = "button";
@@ -149,7 +135,7 @@ function getApplyAndResetButtonsDiv(formViewRef) {
 }
 
 function getInputField(contentForNewLabel, inputFieldValue) {
-  let resumeFormRowDiv = createElement("div", "resumeFormRow");
+  let resumeFormRowDiv = createElement("div", "resumeFormRow fullWidth");
   let newLabel = createElement("label", "resumeFormLabels", contentForNewLabel);
   let newInputField = createElement("input", "resumeFormInputField");
   newInputField.placeholder = "Enter Here";
@@ -165,39 +151,99 @@ function getInputField(contentForNewLabel, inputFieldValue) {
   return resumeFormRowDiv;
 }
 
-function getInputFieldsForEntry(
-  sectionRef,
-  entryContent,
-  entryDivId,
-  formViewRef
-) {
+function getInputFieldsForEntry(entryDetails) {
   let entryDiv = createElement("div", "entryDiv");
-  entryDiv.id = entryDivId;
+  entryDiv.id = entryDetails.entryDivId;
   let entryCancelButton = createElement("button", "entryCancelButton", "x");
   entryCancelButton.type = "button";
-  entryDiv.append(entryCancelButton);
+  if (entryDetails.sectionRef !== "headingSectionForm")
+    entryDiv.append(entryCancelButton);
 
-  if (entryContent === "") {
-    sectionConfig[sectionRef].heads.forEach((labelName, idx) => {
+  if (entryDetails.entryContent === "") {
+    if (!sectionConfig[entryDetails.sectionRef].heads) {
+      entryDiv.append(getInputField("", ""));
+    }
+
+    sectionConfig[entryDetails.sectionRef]?.heads?.forEach((labelName, idx) => {
       entryDiv.append(getInputField(labelName, ""));
     });
-    entryDiv.append(getApplyAndResetButtonsDiv(formViewRef));
+    entryDiv.append(getApplyAndResetButtonsDiv(entryDetails.formViewRef));
     return entryDiv;
   }
 
-  entryContent.forEach((field, idx) => {
-    entryDiv.append(getInputField(sectionConfig[sectionRef].heads[idx], field));
+  entryDetails.entryContent.forEach((field, idx) => {
+    const headsIndexToBeChosen =
+      entryDetails.sectionRef === "headingSectionForm"
+        ? entryDetails.entryIndex
+        : idx;
+
+    const labelContent = sectionConfig[entryDetails.sectionRef].heads
+      ? sectionConfig[entryDetails.sectionRef].heads[headsIndexToBeChosen]
+      : "";
+
+    entryDiv.append(getInputField(labelContent, field));
   });
 
-  entryDiv.append(getApplyAndResetButtonsDiv(formViewRef));
+  entryDiv.append(getApplyAndResetButtonsDiv(entryDetails.formViewRef));
   return entryDiv;
 }
 
 //ResumeView Helper Functions
+function getEntriesForHeadingSection(entries, resumeViewRef) {
+  let sectionEntryList = entries.headingSectionForm;
+
+  const containerDiv = createElement("div", "right headingEntry fullWidth");
+
+  let nameDiv = createElement(
+    "div",
+    "bold name fullWidth",
+    sectionEntryList[0].content
+  );
+  nameDiv.id = "headingSecElementOnRight1";
+  let clgDiv = createElement(
+    "div",
+    "bold clg fullWidth",
+    sectionEntryList[1].content
+  );
+  clgDiv.id = "headingSecElementOnRight2";
+
+  let headParr = createElement("div", "emailDobContainer fullWidth");
+
+  let headParrChildLeft = createElement("div", "leftChildContainer");
+  let spanForBold = createElement("span", "bold", "Email");
+  let aTag = createElement("a");
+  aTag.href = `mailto:${sectionEntryList[2].content}`;
+  aTag.id = "headingSecElementOnRight3";
+  aTag.innerHTML = sectionEntryList[2].content;
+  headParrChildLeft.append(spanForBold, ": ", aTag);
+
+  let headParrChildRight = createElement("div", "rightChildContainer");
+  spanForBold = createElement("span", "bold", "DOB");
+  let spanEle = createElement("span");
+  spanEle.id = "headingSecElementOnRight4";
+  spanEle.innerHTML = sectionEntryList[3].content;
+  headParrChildRight.append(spanForBold, ": ", spanEle);
+
+  headParr.append(headParrChildLeft, headParrChildRight);
+
+  let addDiv = createElement("div", "add fullWidth");
+  spanForBold = createElement("span", "bold", "Address");
+  aTag = createElement("a");
+  aTag.href = "https://goo.gl/maps/Pqpw1ik6q6NmGoHe7";
+  aTag.id = "headingSecElementOnRight5";
+  aTag.innerHTML = sectionEntryList[4].content;
+  aTag.target = "_blank";
+  addDiv.append(spanForBold, ": ", aTag);
+
+  containerDiv.append(nameDiv, clgDiv, headParr, addDiv);
+
+  return containerDiv;
+}
+
 function getEntryForNonCascadedSections(sectionRef, entryContent, entryIdx) {
   const parDiv = createElement(
     "div",
-    sectionConfig[sectionRef].sectionClassName
+    `${sectionConfig[sectionRef].sectionClassName} fullWidth`
   );
   entryContent.forEach((field, idx) => {
     const childDiv = createElement(
@@ -234,7 +280,7 @@ function getSemiParDivs(count, count1, sectionRef, entryContent) {
 function getEntryForCascadedSections(sectionRef, entryContent) {
   const parDiv = createElement(
     "div",
-    sectionConfig[sectionRef].classAttributesForNewFields[0]
+    `${sectionConfig[sectionRef].classAttributesForNewFields[0]} fullWidth`
   );
 
   parDiv.append(
@@ -248,170 +294,317 @@ function getEntryForCascadedSections(sectionRef, entryContent) {
 function getEntryForBulletLists(sectionRef, entryContent) {
   const liDiv = createElement(
     "li",
-    `childDetail marginBottom ${sectionConfig[sectionRef].sectionClassName}`
+    `childDetail marginBottom ${sectionConfig[sectionRef].sectionClassName} fullWidth`
   );
   liDiv.innerHTML = entryContent;
   return liDiv;
 }
 
+function createHeadingSection(resumeViewRef) {
+  resumeViewRef.header = createElement("div", "header fullWidth");
+  let headerP = createElement("p");
+  headerP.id = "headerDate";
+  headerP.innerHTML = "7/16/2021";
+  resumeViewRef.header.append(headerP);
+  headerP = createElement("p");
+  headerP.id = "headerTitle";
+  headerP.innerHTML = "201801046_Resume";
+  resumeViewRef.header.append(headerP);
+
+  resumeViewRef.headerSectionInResume = createElement("div", "row fullWidth");
+  resumeViewRef.headerSectionInResume.classList.add("borderBottom1");
+  const blackLineDiv = createElement("div", "blackLine");
+  const remainingHeadDiv = createElement("div", "remainingHead");
+
+  const leftDiv = createElement("div", "left");
+  const leftDivImg = createElement("img");
+  leftDivImg.src =
+    "https://upload.wikimedia.org/wikipedia/en/b/b1/Dhirubhai_Ambani_Institute_of_Information_and_Communication_Technology_logo.png";
+  leftDivImg.alt = "DAIICT LOGO";
+  leftDiv.append(leftDivImg);
+
+  resumeViewRef.headingEntryList = createElement(
+    "div",
+    "headingEntryListContainer"
+  );
+  remainingHeadDiv.append(leftDiv, resumeViewRef.headingEntryList);
+  resumeViewRef.headerSectionInResume.append(blackLineDiv, remainingHeadDiv);
+  resumeViewRef.resume.append(
+    resumeViewRef.header,
+    resumeViewRef.headerSectionInResume
+  );
+}
+
+function createEducationEntryList(resumeViewRef) {
+  const rowDiv = createElement("div", "row fullWidth");
+  const blackLineDiv = createElement("div", "blackLine");
+  resumeViewRef.educationEntryList = createElement("div", "remaining");
+  const sectionHead = createElement("div", "head1", "EDUCATION");
+  resumeViewRef.educationEntryList.append(sectionHead);
+  rowDiv.append(blackLineDiv, resumeViewRef.educationEntryList);
+  resumeViewRef.resume.append(rowDiv);
+}
+
+function createSkillsEntryList(resumeViewRef) {
+  const rowDiv = createElement("div", "row fullWidth");
+  const blackLineDiv = createElement("div", "blackLine");
+  resumeViewRef.skillsEntryList = createElement("div", "remaining");
+  const sectionHead = createElement("div", "head1", "SKILLS");
+  resumeViewRef.skillsEntryList.append(sectionHead);
+  rowDiv.append(blackLineDiv, resumeViewRef.skillsEntryList);
+  resumeViewRef.resume.append(rowDiv);
+}
+
+function createInternshipEntryList(resumeViewRef) {
+  const rowDiv = createElement("div", "row fullWidth");
+  const blackLineDiv = createElement("div", "blackLine");
+  resumeViewRef.internshipEntryList = createElement("div", "remaining");
+  const sectionHead = createElement(
+    "div",
+    "head1",
+    "PROFESSIONAL EXPERIENCE/INTERNSHIPS"
+  );
+  resumeViewRef.internshipEntryList.append(sectionHead);
+  rowDiv.append(blackLineDiv, resumeViewRef.internshipEntryList);
+  resumeViewRef.resume.append(rowDiv);
+}
+
+function createProjectEntryList(resumeViewRef) {
+  const rowDiv = createElement("div", "row fullWidth");
+  const blackLineDiv = createElement("div", "blackLine");
+  resumeViewRef.projectEntryList = createElement("div", "remaining");
+  const sectionHead = createElement("div", "head1", "PROJECTS");
+  resumeViewRef.projectEntryList.append(sectionHead);
+  rowDiv.append(blackLineDiv, resumeViewRef.projectEntryList);
+  resumeViewRef.resume.append(rowDiv);
+}
+
+function getResponsibilityAndHobbyEntryLists(resumeViewRef) {
+  let horiPart = createElement("div", "horiPart fullWidth");
+  const responsibilitySectionContainer = createElement(
+    "div",
+    "leftChildContainer"
+  );
+  let headVar1 = createElement("div", "head1");
+  headVar1.classList.add("zeroMargin");
+  headVar1.innerHTML = "POSITIONS OF";
+  let headVar2 = createElement("div", "head1");
+  headVar2.classList.add("marginBottomMinus");
+  headVar2.innerHTML = "RESPONSIBILITY";
+  resumeViewRef.responsibilityEntryList = createElement(
+    "ul",
+    "childDetail fullWidth"
+  );
+  responsibilitySectionContainer.append(
+    headVar1,
+    headVar2,
+    resumeViewRef.responsibilityEntryList
+  );
+
+  const hobbySectionContainer = createElement("div", "rightChildContainer");
+  headVar1 = createElement("div", "head1");
+  headVar1.classList.add("marginBottomMinus");
+  headVar1.innerHTML = "INTERESTS AND HOBBIES";
+  resumeViewRef.hobbyEntryList = createElement("ul", "childDetail fullWidth");
+  resumeViewRef.hobbyEntryList.classList.add("marginBottom");
+  hobbySectionContainer.append(headVar1, resumeViewRef.hobbyEntryList);
+
+  horiPart.append(responsibilitySectionContainer, hobbySectionContainer);
+
+  return horiPart;
+}
+
+const headingSectionFormConfig = [
+  {
+    id: `headingSectionForm${1}`,
+    content: ["Ravi Patel"],
+  },
+  {
+    id: `headingSectionForm${2}`,
+    content: [
+      "Dhirubhai Ambani Institute of Information and Communication Technology",
+    ],
+  },
+  {
+    id: `headingSectionForm${3}`,
+    content: ["201801046@daiict.ac.in"],
+  },
+  {
+    id: `headingSectionForm${4}`,
+    content: ["September 29, 2000"],
+  },
+  {
+    id: `headingSectionForm${5}`,
+    content: ["A-308, HoR Men, DA-IICT, Gandhinagar"],
+  },
+];
+const educationSectionFormConfig = [
+  {
+    id: `educationSectionForm${1}`,
+    content: ["Degree", "Institute", "Year", "CPI"],
+    isHeading: true,
+  },
+  {
+    id: `educationSectionForm${2}`,
+    content: [
+      "B.Tech | ICT",
+      "Dhirubhai Ambani Institute of Information and Communication Technology",
+      "2022",
+      "7.8",
+    ],
+  },
+  {
+    id: `educationSectionForm${3}`,
+    content: [
+      "Higher Secondary | Class XII",
+      "H.B. Kapadiya High School, Memnagar, Ahmedabad",
+      "2018",
+      "85%",
+    ],
+  },
+  {
+    id: `educationSectionForm${4}`,
+    content: [
+      "Secondary | Class X",
+      "H.B. Kapadiya High School, Memnagar, Ahmedabad",
+      "2016",
+      "95%",
+    ],
+  },
+];
+const skillsSectionFormConfig = [
+  {
+    id: `skillsSectionForm${1}`,
+    content: [
+      "Expertise Area/Area(s) of Interest",
+      "Data Structures and Algorithms",
+    ],
+  },
+  {
+    id: `skillsSectionForm${2}`,
+    content: ["Programming Language(s)", "C, C++, PostgreSQL"],
+  },
+  {
+    id: `skillsSectionForm${3}`,
+    content: ["Tools and Technologies", "Dev c++, React, LT-Spice"],
+  },
+  {
+    id: `skillsSectionForm${4}`,
+    content: [
+      "Technical Electives",
+      "Operating System, Database Management System, Data Structures, Design and Analysis of Algorithms",
+    ],
+  },
+];
+const internshipSectionFormConfig = [
+  {
+    id: `internshipSectionForm${1}`,
+    content: [
+      "YUVA Unstoppable NGO, Ahmedabad, Gujarat",
+      "(Rural Internship)",
+      "Used to visit 3-4 primary schools and teach students there. Organised events and competitions in different schools with the 'Chhalaang' organisation.",
+      "Guide: Prof. Alka Parikh, Prof. Kalyan Shashidhar",
+      "Dec 5 2019- Dec 31 2019",
+      "Team Size - 7",
+    ],
+  },
+];
+const projectSectionFormConfig = [
+  {
+    id: `projectSectionForm${1}`,
+    content: [
+      "Car Rental Database System",
+      "Guide: Prof. P.M. Jat",
+      "Created a Car Rental Database that covers the data of users, employees, booking history, car rates, payment methods, etc. Normalization has been implemented for the database upto some extent to make responses of queries faster.",
+      "",
+      "Sept 2020 - Nov 2020",
+      "Team Size - 4",
+    ],
+  },
+  {
+    id: `projectSectionForm${2}`,
+    content: [
+      "Student Community Web Application",
+      "Guide: Prof. Jayprakash Lalchandani",
+      "Student Community is a social platform exclusively designed for the DA- IICT community. It contains features like a chat application, posts, polling, suggestions, profile, club coordination, etc.",
+      "(Link : da-student-connect.web.app)",
+      "Sept 2020 - Feb 2020",
+      "Team Size - 3",
+    ],
+  },
+  {
+    id: `projectSectionForm${3}`,
+    content: [
+      "Time Break Desktop(Native) Application",
+      "Guide: Saurabh Tiwari",
+      "Time for a Break is a desktop application that sends reminders at regular intervals to the user to take a short break and relax. It's been build with an electron framework; contains functionalities like schedule, settings, notification, timer, report, etc.",
+      "",
+      "Feb 2020 - May 2020",
+      "Team Size - 10",
+    ],
+  },
+];
+const responsibilitySectionFormConfig = [
+  {
+    id: `responsibilitySectionForm${1}`,
+    content: [
+      "Core committee member of radio Club Daiict (June 2020 - present)",
+    ],
+  },
+  {
+    id: `responsibilitySectionForm${2}`,
+    content: ["Coordinator at Synapse 2020 (Event management) (Feb 2020)"],
+  },
+];
+const hobbySectionFormConfig = [
+  {
+    id: `hobbySectionForm${1}`,
+    content: ["Competitive Programming"],
+  },
+  {
+    id: `hobbySectionForm${2}`,
+    content: ["Reading novels, fictional books, autobiographies"],
+  },
+  {
+    id: `hobbySectionForm${3}`,
+    content: ["Badminton, carrom, drawing, meditation"],
+  },
+  {
+    id: `hobbySectionForm${4}`,
+    content: ["Having a dream of World-tour"],
+  },
+];
+const awardSectionFormConfig = [
+  {
+    id: `awardSectionForm${1}`,
+    content: ["AWARDS AND ACHIEVEMENTS"],
+    isHeading: true,
+  },
+  {
+    id: `awardSectionForm${2}`,
+    content: ["Was awarded MYSY scholarship in first 2 years of college"],
+  },
+  {
+    id: `awardSectionForm${3}`,
+    content: ["Codeforces Max Rating: 1593"],
+  },
+  {
+    id: `awardSectionForm${4}`,
+    content: ["Got 2nd place in Winter Of Code(WOC 2021) in Android Dev"],
+  },
+];
+
 class Model {
   constructor() {
     this.entries = {
-      educationSectionForm: [
-        {
-          id: `educationSectionForm${1}`,
-          content: ["Degree", "Institute", "Year", "CPI"],
-        },
-        {
-          id: `educationSectionForm${2}`,
-          content: [
-            "B.Tech | ICT",
-            "Dhirubhai Ambani Institute of Information and Communication Technology",
-            "2022",
-            "7.8",
-          ],
-        },
-        {
-          id: `educationSectionForm${3}`,
-          content: [
-            "Higher Secondary | Class XII",
-            "H.B. Kapadiya High School, Memnagar, Ahmedabad",
-            "2018",
-            "85%",
-          ],
-        },
-        {
-          id: `educationSectionForm${4}`,
-          content: [
-            "Secondary | Class X",
-            "H.B. Kapadiya High School, Memnagar, Ahmedabad",
-            "2016",
-            "95%",
-          ],
-        },
-      ],
-      skillsSectionForm: [
-        {
-          id: `skillsSectionForm${1}`,
-          content: [
-            "Expertise Area/Area(s) of Interest",
-            "Data Structures and Algorithms",
-          ],
-        },
-        {
-          id: `skillsSectionForm${2}`,
-          content: ["Programming Language(s)", "C, C++, PostgreSQL"],
-        },
-        {
-          id: `skillsSectionForm${3}`,
-          content: ["Tools and Technologies", "Dev c++, React, LT-Spice"],
-        },
-        {
-          id: `skillsSectionForm${4}`,
-          content: [
-            "Technical Electives",
-            "Operating System, Database Management System, Data Structures, Design and Analysis of Algorithms",
-          ],
-        },
-      ],
-      internshipSectionForm: [
-        {
-          id: `internshipSectionForm${1}`,
-          content: [
-            "YUVA Unstoppable NGO, Ahmedabad, Gujarat",
-            "(Rural Internship)",
-            "Used to visit 3-4 primary schools and teach students there. Organised events and competitions in different schools with the 'Chhalaang' organisation.",
-            "Guide: Prof. Alka Parikh, Prof. Kalyan Shashidhar",
-            "Dec 5 2019- Dec 31 2019",
-            "Team Size - 7",
-          ],
-        },
-      ],
-      projectSectionForm: [
-        {
-          id: `projectSectionForm${1}`,
-          content: [
-            "Car Rental Database System",
-            "Guide: Prof. P.M. Jat",
-            "Created a Car Rental Database that covers the data of users, employees, booking history, car rates, payment methods, etc. Normalization has been implemented for the database upto some extent to make responses of queries faster.",
-            "",
-            "Sept 2020 - Nov 2020",
-            "Team Size - 4",
-          ],
-        },
-        {
-          id: `projectSectionForm${2}`,
-          content: [
-            "Student Community Web Application",
-            "Guide: Prof. Jayprakash Lalchandani",
-            "Student Community is a social platform exclusively designed for the DA- IICT community. It contains features like a chat application, posts, polling, suggestions, profile, club coordination, etc.",
-            "(Link : da-student-connect.web.app)",
-            "Sept 2020 - Feb 2020",
-            "Team Size - 3",
-          ],
-        },
-        {
-          id: `projectSectionForm${3}`,
-          content: [
-            "Time Break Desktop(Native) Application",
-            "Guide: Saurabh Tiwari",
-            "Time for a Break is a desktop application that sends reminders at regular intervals to the user to take a short break and relax. It's been build with an electron framework; contains functionalities like schedule, settings, notification, timer, report, etc.",
-            "",
-            "Feb 2020 - May 2020",
-            "Team Size - 10",
-          ],
-        },
-      ],
-      responsibilitySectionForm: [
-        {
-          id: `responsibilitySectionForm${1}`,
-          content: [
-            "Core committee member of radio Club Daiict (June 2020 - present)",
-          ],
-        },
-        {
-          id: `responsibilitySectionForm${2}`,
-          content: [
-            "Coordinator at Synapse 2020 (Event management) (Feb 2020)",
-          ],
-        },
-      ],
-      hobbySectionForm: [
-        {
-          id: `hobbySectionForm${1}`,
-          content: ["Competitive Programming"],
-        },
-        {
-          id: `hobbySectionForm${2}`,
-          content: ["Reading novels, fictional books, autobiographies"],
-        },
-        {
-          id: `hobbySectionForm${3}`,
-          content: ["Badminton, carrom, drawing, meditation"],
-        },
-        {
-          id: `hobbySectionForm${4}`,
-          content: ["Having a dream of World-tour"],
-        },
-      ],
-      awardSectionForm: [
-        {
-          id: `awardSectionForm${1}`,
-          content: ["AWARDS AND ACHIEVEMENTS"],
-        },
-        {
-          id: `awardSectionForm${2}`,
-          content: ["Was awarded MYSY scholarship in first 2 years of college"],
-        },
-        {
-          id: `awardSectionForm${3}`,
-          content: ["Codeforces Max Rating: 1593"],
-        },
-        {
-          id: `awardSectionForm${4}`,
-          content: ["Got 2nd place in Winter Of Code(WOC 2021) in Android Dev"],
-        },
-      ],
+      headingSectionForm: headingSectionFormConfig,
+      educationSectionForm: educationSectionFormConfig,
+      skillsSectionForm: skillsSectionFormConfig,
+      internshipSectionForm: internshipSectionFormConfig,
+      projectSectionForm: projectSectionFormConfig,
+      responsibilitySectionForm: responsibilitySectionFormConfig,
+      hobbySectionForm: hobbySectionFormConfig,
+      awardSectionForm: awardSectionFormConfig,
     };
   }
 
@@ -446,14 +639,17 @@ class Model {
 class FormView {
   constructor() {
     this.resumeForm = createElement("div", "resumeForm");
-    this.currentSectionDisplayed = "headingSectionForm";
+    this.currentSectionDisplayedName = "";
 
-    this.formHead = createElement("h1", "resumeFormHeading");
+    this.formHead = createElement("h1", "resumeFormHeading fullWidth");
     this.formHead.textContent = "Resume Generator";
 
-    this.selectDropdownContainer = createElement("div", "selectDropdown");
+    this.selectDropdownContainer = createElement(
+      "div",
+      "selectDropdownContainer fullWidth"
+    );
     this.selectDropdown = createElement("select");
-    this.selectDropdown.id = "selectDropdownId";
+    this.selectDropdown.id = "selectDropdown";
     this.selectDropdown.addEventListener("change", () => {
       this.onSelectChange();
     });
@@ -474,61 +670,24 @@ class FormView {
 
     this.selectDropdownContainer.append(this.selectDropdown);
 
-    this.headingSectionForm = createElement("div");
-    this.headingSectionForm.id = "headingSectionForm";
-
-    let headingSectionFormHead = createElement(
-      "h2",
-      "sectionHeading",
-      "Heading Section"
-    );
-
-    this.headingSectionForm.append(
-      headingSectionFormHead,
-      getHeadingSectionRow("Name", "headingSecInputFieldOnLeft1", "Ravi Patel"),
-      getHeadingSectionRow(
-        "Collage",
-        "headingSecInputFieldOnLeft2",
-        "Dhirubhai Ambani Institute of Information and Communication Technology"
-      ),
-      getHeadingSectionRow(
-        "Email",
-        "headingSecInputFieldOnLeft3",
-        "201801046@daiict.ac.in"
-      ),
-      getHeadingSectionRow(
-        "DOB",
-        "headingSecInputFieldOnLeft4",
-        "September 29, 2000"
-      ),
-      getHeadingSectionRow(
-        "Address",
-        "headingSecInputFieldOnLeft5",
-        "A-308, HoR Men, DA-IICT, Gandhinagar"
-      )
-    );
-
-    this.sectionForm = createElement("form", "sectionForm");
+    this.sectionForm = createElement("form", "fullWidth");
     this.sectionForm.action = "";
     this.sectionForm.addEventListener("submit", (event) => {
       event.preventDefault();
     });
 
     this.sectionForm.append(
-      getFormSectionHeading("educationSectionForm", "Education", this),
-      getFormSectionHeading("skillsSectionForm", "Skills", this),
-      getFormSectionHeading("internshipSectionForm", "Internships", this),
-      getFormSectionHeading("projectSectionForm", "Projects", this),
-      getFormSectionHeading("awardSectionForm", "Awards & Achievements", this),
-      getFormSectionHeading(
-        "responsibilitySectionForm",
-        "Positions Of Responsibilities",
-        this
-      ),
-      getFormSectionHeading("hobbySectionForm", "Interests & Hobbies", this)
+      createSectionRef("headingSectionForm", this),
+      createSectionRef("educationSectionForm", this),
+      createSectionRef("skillsSectionForm", this),
+      createSectionRef("internshipSectionForm", this),
+      createSectionRef("projectSectionForm", this),
+      createSectionRef("awardSectionForm", this),
+      createSectionRef("responsibilitySectionForm", this),
+      createSectionRef("hobbySectionForm", this)
     );
 
-    this.addBtnDiv = createElement("div");
+    this.addBtnDiv = createElement("div", "fullWidth");
     this.addBtnDiv.id = "addNewEntryButton";
     this.addBtn = createElement("button");
     this.addBtn.id = "addNewEntryBtnId";
@@ -551,13 +710,19 @@ class FormView {
   onSelectChange() {
     const selectedValue = this.selectDropdown.value;
 
-    this[this.currentSectionDisplayed].style.display = "none";
-    this[selectedValue].style.display = "block";
-    this.currentSectionDisplayed = selectedValue;
+    const currentSectionDisplayed = this[this.currentSectionDisplayedName];
+    currentSectionDisplayed?.parentElement.removeChild(currentSectionDisplayed);
 
-    if (selectedValue !== "" && selectedValue !== "headingSectionForm")
-      this.addBtnDiv.style.display = "flex";
+    this.handleChangeInSelectDropDown(selectedValue);
+    this.currentSectionDisplayedName = selectedValue;
+
+    this.addBtnDiv.style.display = "flex";
     this.applyAndResetBtnsDiv.style.display = "flex";
+
+    if (selectedValue === "" || selectedValue === "headingSectionForm") {
+      this.addBtnDiv.style.display = "none";
+      return;
+    }
   }
 
   handleReset(entries) {
@@ -584,7 +749,7 @@ class FormView {
     }
   }
 
-  handleApply(handler, entries, viewHandlerToDisplayEntriesAgain) {
+  handleApply(handler, entries, onActionComplete) {
     const applyButtons = document.getElementsByClassName("applyBtn");
 
     for (let applyButton of applyButtons) {
@@ -601,12 +766,12 @@ class FormView {
 
         handler(selectedValue, parentEntryDiv.id, originalValues);
         emptySectionsInResumeView();
-        viewHandlerToDisplayEntriesAgain(entries);
+        onActionComplete(entries);
       });
     }
   }
 
-  handleDeleteEntry(handler, entries, viewHandlerToDisplayEntriesAgain) {
+  handleDeleteEntry(handler, entries, onActionComplete) {
     let selectedValue;
     const removeButtons = document.getElementsByClassName("entryCancelButton");
     for (let currRemoveBtn of removeButtons) {
@@ -617,18 +782,12 @@ class FormView {
 
         this.addBtn.textContent = "Add";
         emptySectionsInResumeView();
-        viewHandlerToDisplayEntriesAgain(entries);
+        onActionComplete(entries);
       });
     }
   }
 
-  handleAddEntry(
-    handler,
-    entries,
-    handlerForDelete,
-    handlerForApply,
-    viewHandlerToDisplayEntriesAgain
-  ) {
+  handleAddEntry(args) {
     this.addBtn.addEventListener("click", () => {
       let selectedValue = this.selectDropdown.value;
 
@@ -638,17 +797,22 @@ class FormView {
           parseInt(this[selectedValue].lastChild.id.slice(-1)) + 1;
         const newId = `${selectedValue}${newIterator}`;
         this[selectedValue].append(
-          getInputFieldsForEntry(selectedValue, "", newId, this)
+          getInputFieldsForEntry({
+            sectionRef: selectedValue,
+            entryContent: "",
+            entryDivId: newId,
+            formViewRef: this,
+          })
         );
         this.handleDeleteEntry(
-          handlerForDelete,
-          entries,
-          viewHandlerToDisplayEntriesAgain
+          args.handlerForDelete,
+          args.entries,
+          args.onActionComplete
         );
         this.handleApply(
-          handlerForApply,
-          entries,
-          viewHandlerToDisplayEntriesAgain
+          args.handlerForApply,
+          args.entries,
+          args.onActionComplete
         );
       } else {
         this.addBtn.textContent = "Add";
@@ -658,31 +822,36 @@ class FormView {
           newValues.push(field.value);
         });
 
-        handler(selectedValue, newValues);
-        this.handleReset(entries);
+        args.handler(selectedValue, newValues);
+        this.handleReset(args.entries);
         emptySectionsInResumeView();
-        viewHandlerToDisplayEntriesAgain(entries);
+        args.onActionComplete(args.entries);
       }
     });
   }
 
-  getFormForAllSections(entries) {
-    for (let section in sectionConfig) {
-      if (section === "headingSectionForm") continue;
-      let sectionEntryList = entries[section];
-      sectionEntryList.map((entry) => {
-        if (
-          (section === "educationSectionForm" ||
-            section === "awardSectionForm") &&
-          entry.id === `${section}1`
-        ) {
-        } else {
-          this[section].append(
-            getInputFieldsForEntry(section, entry.content, entry.id, this)
-          );
-        }
-      });
-    }
+  getFormForSection(entries, section) {
+    let heading = createElement(
+      "h2",
+      "sectionHeading fullWidth",
+      sectionConfig[section].name
+    );
+    this[section].append(heading);
+
+    let sectionEntryList = entries[section];
+    sectionEntryList.map((entry, entryIndex) => {
+      if (entry?.isHeading) return;
+
+      this[section].append(
+        getInputFieldsForEntry({
+          sectionRef: section,
+          entryContent: entry.content,
+          entryDivId: entry.id,
+          formViewRef: this,
+          entryIndex,
+        })
+      );
+    });
   }
 }
 
@@ -690,158 +859,31 @@ class ResumeView {
   constructor() {
     this.resumeView = createElement("div", "resumeView");
 
-    this.box = createElement("div", "box");
+    this.box = createElement("div", "box fullWidth");
     this.resume = createElement("div", "resume");
 
-    this.header = createElement("div", "header");
-    let headerP = createElement("p");
-    headerP.id = "headerDate";
-    headerP.innerHTML = "7/16/2021";
-    this.header.append(headerP);
-    headerP = createElement("p");
-    headerP.id = "headerTitle";
-    headerP.innerHTML = "201801046_Resume";
-    this.header.append(headerP);
+    createHeadingSection(this);
+    createEducationEntryList(this);
+    createSkillsEntryList(this);
+    createInternshipEntryList(this);
+    createProjectEntryList(this);
 
-    this.headerSectionInResume = createElement("div", "row");
-    this.headerSectionInResume.classList.add("borderBottom1");
+    let rowDiv = createElement("div", "row fullWidth");
     let blackLineDiv = createElement("div", "blackLine");
-    let remainingHeadDiv = createElement("div", "remainingHead");
+    let remainingDiv = createElement("div", "remaining fullWidth");
 
-    let leftDiv = createElement("div", "left");
-    let leftDivImg = createElement("img");
-    leftDivImg.src =
-      "https://upload.wikimedia.org/wikipedia/en/b/b1/Dhirubhai_Ambani_Institute_of_Information_and_Communication_Technology_logo.png";
-    leftDivImg.alt = "DAIICT LOGO";
-    leftDiv.append(leftDivImg);
-
-    let rightDiv = createElement("div", "right");
-
-    let nameDiv = createElement("div", "bold", "Ravi Patel");
-    nameDiv.classList.add("name");
-    nameDiv.id = "headingSecElementOnRight1";
-    let clgDiv = createElement(
-      "div",
-      "clg",
-      "Dhirubhai Ambani Institute of Information and Communication Technology"
-    );
-    clgDiv.classList.add("bold");
-    clgDiv.id = "headingSecElementOnRight2";
-
-    let headParr = createElement("div", "headParr");
-
-    let headParrChildLeft = createElement("div", "headParrChildLeft");
-    let spanForBold = createElement("span", "bold", "Email");
-    let aTag = createElement("a");
-    aTag.href = "mailto:201801046@daiict.ac.in";
-    aTag.id = "headingSecElementOnRight3";
-    aTag.innerHTML = "201801046@daiict.com";
-    headParrChildLeft.append(spanForBold, ": ", aTag);
-
-    let headParrChildRight = createElement("div", "headParrChildRight");
-    spanForBold = createElement("span", "bold", "DOB");
-    let spanEle = createElement("span");
-    spanEle.id = "headingSecElementOnRight4";
-    spanEle.innerHTML = "September 29, 2000";
-    headParrChildRight.append(spanForBold, ": ", spanEle);
-
-    headParr.append(headParrChildLeft, headParrChildRight);
-
-    let addDiv = createElement("div", "add");
-    spanForBold = createElement("span", "bold", "Address");
-    aTag = createElement("a");
-    aTag.href = "https://goo.gl/maps/Pqpw1ik6q6NmGoHe7";
-    aTag.id = "headingSecElementOnRight5";
-    aTag.innerHTML = "A-308, HoR Men, DA-IICT, Gandhinagar";
-    aTag.target = "_blank";
-    addDiv.append(spanForBold, ": ", aTag);
-
-    rightDiv.append(nameDiv, clgDiv, headParr, addDiv);
-    remainingHeadDiv.append(leftDiv, rightDiv);
-    this.headerSectionInResume.append(blackLineDiv, remainingHeadDiv);
-    this.resume.append(this.header, this.headerSectionInResume);
-
-    let rowDiv = createElement("div", "row");
-    blackLineDiv = createElement("div", "blackLine");
-    this.educationEntryList = createElement("div", "remaining");
-    let sectionHead = createElement("div", "head1", "EDUCATION");
-    this.educationEntryList.append(sectionHead);
-    //Education Entry List
-    rowDiv.append(blackLineDiv, this.educationEntryList);
-    this.resume.append(rowDiv);
-
-    rowDiv = createElement("div", "row");
-    blackLineDiv = createElement("div", "blackLine");
-    this.skillsEntryList = createElement("div", "remaining");
-    sectionHead = createElement("div", "head1", "SKILLS");
-    this.skillsEntryList.append(sectionHead);
-    //Skills Entry List
-    rowDiv.append(blackLineDiv, this.skillsEntryList);
-    this.resume.append(rowDiv);
-
-    rowDiv = createElement("div", "row");
-    blackLineDiv = createElement("div", "blackLine");
-    this.internshipEntryList = createElement("div", "remaining");
-    sectionHead = createElement(
-      "div",
-      "head1",
-      "PROFESSIONAL EXPERIENCE/INTERNSHIPS"
-    );
-    this.internshipEntryList.append(sectionHead);
-    //Internship Entry List
-    rowDiv.append(blackLineDiv, this.internshipEntryList);
-    this.resume.append(rowDiv);
-
-    rowDiv = createElement("div", "row");
-    blackLineDiv = createElement("div", "blackLine");
-    this.projectEntryList = createElement("div", "remaining");
-    sectionHead = createElement("div", "head1", "PROJECTS");
-    this.projectEntryList.append(sectionHead);
-    //Project Entry List
-    rowDiv.append(blackLineDiv, this.projectEntryList);
-    this.resume.append(rowDiv);
-
-    rowDiv = createElement("div", "row");
-    blackLineDiv = createElement("div", "blackLine");
-    let remainingDiv = createElement("div", "remaining");
-
-    let vertiPart = createElement("div", "vertiPart");
-    let horiPart = createElement("div", "horiPart");
-
-    headParrChildLeft = createElement("div", "headParrChildLeft");
-    let headVar1 = createElement("div", "head1");
-    headVar1.classList.add("zeroMargin");
-    headVar1.innerHTML = "POSITIONS OF";
-    let headVar2 = createElement("div", "head1");
-    headVar2.classList.add("marginBottomMinus");
-    headVar2.innerHTML = "RESPONSIBILITY";
-    this.responsibilityEntryList = createElement("ul", "childDetail");
-    //Responsibility Entry List
-    headParrChildLeft.append(headVar1, headVar2, this.responsibilityEntryList);
-
-    headParrChildRight = createElement("div", "headParrChildRight");
-    headVar1 = createElement("div", "head1");
-    headVar1.classList.add("marginBottomMinus");
-    headVar1.innerHTML = "INTERESTS AND HOBBIES";
-    this.hobbyEntryList = createElement("ul", "childDetail");
-    this.hobbyEntryList.classList.add("marginBottom");
-    //Hobby Entry List
-    headParrChildRight.append(headVar1, this.hobbyEntryList);
-
-    horiPart.append(headParrChildLeft, headParrChildRight);
-
+    let vertiPart = createElement("div", "vertiPart fullWidth");
     this.awardEntryList = createElement(
       "div",
-      "awardEntriesContainer lastSection"
+      "awardEntriesContainer lastSection fullWidth"
     );
-    //Award Entry List
-
-    vertiPart.append(horiPart, this.awardEntryList);
+    vertiPart.append(
+      getResponsibilityAndHobbyEntryLists(this),
+      this.awardEntryList
+    );
     remainingDiv.append(vertiPart);
-
     rowDiv.append(blackLineDiv, remainingDiv);
     this.resume.append(rowDiv);
-
     this.box.append(this.resume);
     this.resumeView.append(this.box);
 
@@ -849,6 +891,7 @@ class ResumeView {
   }
 
   displaySectionEntries(entries) {
+    this.headingEntryList.append(getEntriesForHeadingSection(entries, this));
     let sectionEntryList = entries.educationSectionForm;
     sectionEntryList.map((entry) => {
       this.educationEntryList.append(
@@ -903,27 +946,30 @@ class View {
     this.app.append(this.formView.resumeForm, this.resumeView.resumeView);
   }
 
-  initialize(entries, handleDelete, handleAdd, handleEdit) {
-    this.resumeView.displaySectionEntries(entries);
-    this.formView.getFormForAllSections(entries);
-    this.formView.handleReset(entries);
-    this.formView.handleApply(
-      handleEdit,
-      entries,
-      this.handleDisplayOfEntriesInResumeView
-    );
-    this.formView.handleDeleteEntry(
-      handleDelete,
-      entries,
-      this.handleDisplayOfEntriesInResumeView
-    );
-    this.formView.handleAddEntry(
-      handleAdd,
-      entries,
-      handleDelete,
-      handleEdit,
-      this.handleDisplayOfEntriesInResumeView
-    );
+  initialize(args) {
+    this.resumeView.displaySectionEntries(args.entries);
+
+    this.formView.handleChangeInSelectDropDown = (section) => {
+      this.formView.getFormForSection(args.entries, section);
+      this.formView.handleReset(args.entries);
+      this.formView.handleApply(
+        args.handleEdit,
+        args.entries,
+        this.handleDisplayOfEntriesInResumeView
+      );
+      this.formView.handleDeleteEntry(
+        args.handleDelete,
+        args.entries,
+        this.handleDisplayOfEntriesInResumeView
+      );
+      this.formView.handleAddEntry({
+        handler: args.handleAdd,
+        entries: args.entries,
+        handlerForDelete: args.handleDelete,
+        handlerForApply: args.handleEdit,
+        onActionComplete: this.handleDisplayOfEntriesInResumeView,
+      });
+    };
   }
 
   handleDisplayOfEntriesInResumeView = (entries) => {
@@ -936,12 +982,12 @@ class Controller {
     this.model = model;
     this.view = view;
 
-    this.view.initialize(
-      this.model.entries,
-      this.handleDelete,
-      this.handleAdd,
-      this.handleEdit
-    );
+    this.view.initialize({
+      entries: this.model.entries,
+      handleDelete: this.handleDelete,
+      handleAdd: this.handleAdd,
+      handleEdit: this.handleEdit,
+    });
   }
 
   handleEdit = (sectionClassName, id, updatedcontent) => {
